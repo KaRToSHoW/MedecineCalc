@@ -1,0 +1,31 @@
+{
+  "name": "medcalc-expo",
+  "version": "0.1.0",
+  "private": true,
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@expo/webpack-config": "^18.0.1",
+    "@react-native-async-storage/async-storage": "1.17.11",
+    "@react-navigation/bottom-tabs": "^6.5.7",
+    "@react-navigation/native": "^6.1.6",
+    "@react-navigation/native-stack": "^6.9.12",
+    "expo": "~48.0.0",
+    "firebase": "^9.22.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-native": "0.71.8",
+    "react-native-safe-area-context": "4.5.0",
+    "react-native-screens": "~3.20.0",
+    "react-native-toast-message": "^2.3.3",
+    "react-native-web": "~0.18.10",
+    "react-native-chart-kit": "^6.12.0",
+    "react-native-svg": "^13.4.0",
+    "@expo/vector-icons": "^13.0.0"
+  }
+}

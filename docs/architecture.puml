@@ -1,0 +1,33 @@
+@startuml
+title Медицинский калькулятор — Архитектура
+
+package "Client (Expo App)" {
+  [CalculatorScreen]
+  [HistoryScreen]
+  [ProfileScreen]
+  [DashboardScreen]
+}
+
+package "Firebase" {
+  [Auth]
+  [Firestore]
+}
+
+actor Doctor
+
+Doctor --> CalculatorScreen : ввод данных, расчёт
+CalculatorScreen --> Auth : проверка текущего пользователя
+CalculatorScreen --> Firestore : addDoc(users/{uid}/history)
+HistoryScreen --> Firestore : onSnapshot(users/{uid}/history)
+ProfileScreen --> Firestore : getDoc/setDoc(users/{uid}/meta/profile)
+DashboardScreen --> Firestore : onSnapshot(users/{uid}/history)
+
+Auth --> Doctor : аутентификация
+
+note right of Firestore
+  Ядро хранения: коллекции
+  - users/{uid}/history
+  - users/{uid}/meta
+end note
+
+@enduml
