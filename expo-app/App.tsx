@@ -9,6 +9,7 @@ import HistoryScreen from './screens/HistoryScreen';
 import AuthScreen from './screens/AuthScreen';
 import GlassTabBar from './components/GlassTabBar';
 import SwipeWrapper from './components/SwipeWrapper';
+import { ThemeProvider, useTheme } from './components/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { auth } from './firebase/initFirebase';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -57,7 +58,29 @@ export default function App() {
   }, []);
 
   return (
-    <NavigationContainer>
+    <ThemeProvider>
+      <ThemeWrapper user={user} />
+    </ThemeProvider>
+  );
+}
+
+function ThemeWrapper({ user }: { user: any }) {
+  const { theme } = useTheme();
+
+  const navTheme: any = {
+    dark: !!theme.dark,
+    colors: {
+      primary: theme.primary,
+      background: theme.background,
+      card: theme.card,
+      text: theme.text,
+      border: theme.border ?? theme.card,
+      notification: theme.accent ?? theme.primary
+    }
+  };
+
+  return (
+    <NavigationContainer theme={navTheme}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
           <Stack.Screen name="Main" component={MainTabs} />

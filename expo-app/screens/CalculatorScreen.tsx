@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView, Pressable } from 'react-native';
+import ThemedInput from '../components/ThemedInput';
+import { useTheme } from '../components/ThemeContext';
 import Toast from 'react-native-toast-message';
 import { auth, db } from '../firebase/initFirebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -17,6 +19,7 @@ function cockcroftGault(weightKg: number, ageYears: number, serumCrMgDl: number,
 }
 
 export default function CalculatorScreen({ navigation }: { navigation?: any }) {
+  const { theme } = useTheme();
   const [weight, setWeight] = useState('70');
   const [age, setAge] = useState('40');
   const [creatinine, setCreatinine] = useState('1.0');
@@ -67,60 +70,55 @@ export default function CalculatorScreen({ navigation }: { navigation?: any }) {
   };
 
   function classifyClCr(val: number | null) {
-    if (val === null) return { label: '—', color: '#64748B', bg: '#F1F5F9' };
-    if (val >= 90) return { label: 'Норма', color: '#059669', bg: '#ECFDF5' };
-    if (val >= 60) return { label: 'Лёгкое снижение', color: '#F59E0B', bg: '#FFFBEB' };
-    if (val >= 30) return { label: 'Умеренное снижение', color: '#F97316', bg: '#FFF7ED' };
-    if (val >= 15) return { label: 'Выраженное снижение', color: '#DC2626', bg: '#FFF1F2' };
-    return { label: 'Терминальная почечная недостаточность', color: '#7F1D1D', bg: '#FEE2E2' };
+    const alpha = '22';
+    if (val === null) return { label: '—', color: theme.mutted, bg: theme.border };
+    if (val >= 90) return { label: 'Норма', color: theme.success, bg: theme.success + alpha };
+    if (val >= 60) return { label: 'Лёгкое снижение', color: theme.warning, bg: theme.warning + alpha };
+    if (val >= 30) return { label: 'Умеренное снижение', color: theme.warning, bg: theme.warning + alpha };
+    if (val >= 15) return { label: 'Выраженное снижение', color: theme.danger, bg: theme.danger + alpha };
+    return { label: 'Терминальная почечная недостаточность', color: theme.danger, bg: theme.danger + alpha };
   }
 
   return (
     <ScrollView 
-      contentContainerStyle={styles.container}
+      contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}
       showsVerticalScrollIndicator={false}
     >
       {/* Заголовок */}
       <View style={styles.header}>
         <View style={styles.headerIcon}>
-          <Ionicons name="calculator" size={24} color="#007AFF" />
+          <Ionicons name="calculator" size={24} color={theme.primary} />
         </View>
         <View style={styles.headerText}>
-          <Text style={styles.title}>Cockcroft–Gault</Text>
-          <Text style={styles.subtitle}>Клиренс креатинина</Text>
+          <Text style={[styles.title, { color: theme.text }]}>Cockcroft–Gault</Text>
+          <Text style={[styles.subtitle, { color: theme.mutted }]}>Клиренс креатинина</Text>
         </View>
       </View>
 
       {/* Форма */}
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: theme.card }]}>
         {/* Имя пациента */}
         <View style={styles.formGroup}>
           <Text style={styles.label}>Пациент</Text>
-          <View style={styles.inputWrapper}>
-            <Ionicons name="person-outline" size={18} color="#94A3B8" style={styles.inputIcon} />
-            <TextInput 
-              style={styles.input} 
-              value={patientName} 
-              onChangeText={setPatientName} 
-              placeholder="Имя (необязательно)"
-              placeholderTextColor="#CBD5E1"
-            />
-          </View>
+          <ThemedInput
+            leftIcon={<Ionicons name="person-outline" size={18} color={theme.mutted} />}
+            value={patientName}
+            onChangeText={setPatientName}
+            placeholder="Имя (необязательно)"
+          />
         </View>
 
         {/* Вес */}
         <View style={styles.formGroup}>
           <Text style={styles.label}>Вес</Text>
           <View style={styles.rowInput}>
-            <View style={[styles.inputWrapper, { flex: 1 }]}>
-              <MaterialCommunityIcons name="weight-kilogram" size={18} color="#94A3B8" style={styles.inputIcon} />
-              <TextInput 
-                style={styles.input} 
-                value={weight} 
-                onChangeText={setWeight} 
-                keyboardType="numeric" 
+            <View style={{ flex: 1 }}>
+              <ThemedInput
+                leftIcon={<MaterialCommunityIcons name="weight-kilogram" size={18} color={theme.mutted} />}
+                value={weight}
+                onChangeText={setWeight}
+                keyboardType="numeric"
                 placeholder="70"
-                placeholderTextColor="#CBD5E1"
               />
             </View>
             <View style={styles.unitToggle}>
@@ -145,33 +143,13 @@ export default function CalculatorScreen({ navigation }: { navigation?: any }) {
           {/* Возраст */}
           <View style={[styles.formGroup, { flex: 1, marginRight: 8 }]}>
             <Text style={styles.label}>Возраст</Text>
-            <View style={styles.inputWrapper}>
-              <Ionicons name="calendar-outline" size={18} color="#94A3B8" style={styles.inputIcon} />
-              <TextInput 
-                style={styles.input} 
-                value={age} 
-                onChangeText={setAge} 
-                keyboardType="numeric" 
-                placeholder="40"
-                placeholderTextColor="#CBD5E1"
-              />
-            </View>
+            <ThemedInput leftIcon={<Ionicons name="calendar-outline" size={18} color={theme.mutted} />} value={age} onChangeText={setAge} keyboardType="numeric" placeholder="40" />
           </View>
 
           {/* Креатинин */}
           <View style={[styles.formGroup, { flex: 1 }]}>
             <Text style={styles.label}>Креатинин</Text>
-            <View style={styles.inputWrapper}>
-              <Ionicons name="water-outline" size={18} color="#94A3B8" style={styles.inputIcon} />
-              <TextInput 
-                style={[styles.input, { paddingRight: 4 }]} 
-                value={creatinine} 
-                onChangeText={setCreatinine} 
-                keyboardType="numeric" 
-                placeholder="1.0"
-                placeholderTextColor="#CBD5E1"
-              />
-            </View>
+            <ThemedInput leftIcon={<Ionicons name="water-outline" size={18} color={theme.mutted} />} value={creatinine} onChangeText={setCreatinine} keyboardType="numeric" placeholder="1.0" />
           </View>
         </View>
 
@@ -179,15 +157,15 @@ export default function CalculatorScreen({ navigation }: { navigation?: any }) {
         <View style={[styles.unitToggle, { width: '100%', marginBottom: 16 }]}>
           <Pressable 
             onPress={() => setCreatinineUnit('mg/dL')} 
-            style={[styles.unitBtn, { flex: 1 }, creatinineUnit === 'mg/dL' && styles.unitBtnActive]}
+            style={[styles.unitBtn, { flex: 1 }, creatinineUnit === 'mg/dL' && { backgroundColor: theme.primary }]}
           >
-            <Text style={[styles.unitText, creatinineUnit === 'mg/dL' && styles.unitTextActive]}>mg/dL</Text>
+            <Text style={[styles.unitText, creatinineUnit === 'mg/dL' && { color: '#fff' } ]}>mg/dL</Text>
           </Pressable>
           <Pressable 
             onPress={() => setCreatinineUnit('umol/L')} 
-            style={[styles.unitBtn, { flex: 1 }, creatinineUnit === 'umol/L' && styles.unitBtnActive]}
+            style={[styles.unitBtn, { flex: 1 }, creatinineUnit === 'umol/L' && { backgroundColor: theme.primary }]}
           >
-            <Text style={[styles.unitText, creatinineUnit === 'umol/L' && styles.unitTextActive]}>µmol/L</Text>
+            <Text style={[styles.unitText, creatinineUnit === 'umol/L' && { color: '#fff' } ]}>µmol/L</Text>
           </Pressable>
         </View>
 
@@ -197,56 +175,56 @@ export default function CalculatorScreen({ navigation }: { navigation?: any }) {
           <View style={styles.genderToggle}>
             <Pressable 
               onPress={() => setFemale(false)} 
-              style={[styles.genderBtn, !female && styles.genderBtnActive]}
+              style={[styles.genderBtn, !female && { backgroundColor: theme.card }, !female && { borderColor: theme.border } , !female && { } , !female && { } , !female && { } , !female && { } , !female && { } , !female && { } , !female && { } , !female && { } , !female && { } , !female && { } , !female && { } , !female && { } , !female && { } , !female && { } ]}
             >
               <Ionicons 
                 name="male" 
                 size={20} 
-                color={!female ? '#fff' : '#64748B'} 
+                color={!female ? theme.text : theme.mutted} 
               />
-              <Text style={[styles.genderText, !female && styles.genderTextActive]}>Мужской</Text>
+              <Text style={[styles.genderText, !female && { color: theme.text } ]}>Мужской</Text>
             </Pressable>
             <Pressable 
               onPress={() => setFemale(true)} 
-              style={[styles.genderBtn, female && styles.genderBtnActive]}
+              style={[styles.genderBtn, female && { backgroundColor: theme.primary }]}
             >
               <Ionicons 
                 name="female" 
                 size={20} 
-                color={female ? '#fff' : '#64748B'} 
+                color={female ? '#fff' : theme.mutted} 
               />
-              <Text style={[styles.genderText, female && styles.genderTextActive]}>Женский</Text>
+              <Text style={[styles.genderText, female && { color: '#fff' }]}>Женский</Text>
             </Pressable>
           </View>
         </View>
       </View>
 
       {/* Кнопка расчёта */}
-      <Pressable onPress={calculate}>
-        <LinearGradient
-          colors={['#007AFF', '#0051D5']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.calculateBtn}
-        >
-          <Ionicons name="calculator" size={20} color="#fff" />
-          <Text style={styles.calculateBtnText}>Рассчитать клиренс</Text>
-        </LinearGradient>
-      </Pressable>
+          <Pressable onPress={calculate}>
+              <LinearGradient
+                colors={[theme.primary, theme.accent ?? theme.primary]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={[styles.calculateBtn, { shadowColor: theme.primary }]}
+              >
+                <Ionicons name="calculator" size={20} color="#fff" />
+                <Text style={[styles.calculateBtnText, { color: '#fff' }]}>Рассчитать клиренс</Text>
+              </LinearGradient>
+          </Pressable>
 
       {/* Результат */}
       {result !== null && (
         (() => {
           const cat = classifyClCr(result);
-          return (
-            <View style={[styles.resultCard, { borderColor: cat.color, shadowColor: cat.color }] }>
+            return (
+            <View style={[styles.resultCard, { borderColor: cat.color, shadowColor: cat.color, backgroundColor: theme.card } ]}>
               <View style={styles.resultHeader}>
                 <Ionicons name="checkmark-circle" size={24} color={cat.color} />
-                <Text style={styles.resultTitle}>Результат</Text>
+                <Text style={[styles.resultTitle, { color: theme.mutted }]}>Результат</Text>
               </View>
               <View style={styles.resultValueContainer}>
                 <Text style={[styles.resultValue, { color: cat.color }]}>{result}</Text>
-                <Text style={styles.resultUnit}>mL/min</Text>
+                <Text style={[styles.resultUnit, { color: theme.mutted }]}>mL/min</Text>
               </View>
               <View style={[styles.resultInfo, { backgroundColor: cat.bg }] }>
                 <Ionicons name="information-circle-outline" size={16} color={cat.color} />

@@ -3,6 +3,7 @@ import { View, Text, FlatList, StyleSheet, TextInput, Pressable } from 'react-na
 import { auth, db } from '../firebase/initFirebase';
 import { collection, query, orderBy, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTheme } from '../components/ThemeContext';
 import Toast from 'react-native-toast-message';
 
 function formatDate(ts: any) {
@@ -41,6 +42,7 @@ interface HistoryItem {
 export default function HistoryScreen() {
   const [items, setItems] = useState<HistoryItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const { theme } = useTheme();
 
   useEffect(() => {
     let unsub: (() => void) | null = null;
@@ -73,67 +75,69 @@ export default function HistoryScreen() {
     : items.filter(it => (it.patientName || '').toLowerCase().includes(searchQuery.trim().toLowerCase()));
 
   const getResultColor = (result?: number) => {
-    if (!result) return '#64748B';
-    if (result < 60) return '#EF4444';
-    if (result < 90) return '#F59E0B';
-    return '#10B981';
+    if (!result) return theme.mutted;
+    if (result < 60) return theme.danger;
+    if (result < 90) return theme.warning;
+    return theme.success;
   };
 
   const classifyClCr = (val?: number) => {
-    if (val == null) return { label: '—', color: '#64748B', bg: '#F1F5F9' };
-    if (val >= 90) return { label: 'Норма', color: '#059669', bg: '#ECFDF5' };
-    if (val >= 60) return { label: 'Лёгкое снижение', color: '#F59E0B', bg: '#FFFBEB' };
-    if (val >= 30) return { label: 'Умеренное снижение', color: '#F97316', bg: '#FFF7ED' };
-    if (val >= 15) return { label: 'Выраженное снижение', color: '#DC2626', bg: '#FFF1F2' };
-    return { label: 'Терминальная почечная недостаточность', color: '#7F1D1D', bg: '#FEE2E2' };
+    // return a label, color and subtle background (translucent) based on theme
+    const alpha = '22'; // light transparency suffix for hex
+    if (val == null) return { label: '—', color: theme.mutted, bg: theme.border };
+    if (val >= 90) return { label: 'Норма', color: theme.success, bg: (theme.success + alpha) };
+    if (val >= 60) return { label: 'Лёгкое снижение', color: theme.warning, bg: (theme.warning + alpha) };
+    if (val >= 30) return { label: 'Умеренное снижение', color: theme.warning, bg: (theme.warning + alpha) };
+    if (val >= 15) return { label: 'Выраженное снижение', color: theme.danger, bg: (theme.danger + alpha) };
+    return { label: 'Терминальная почечная недостаточность', color: '#7F1D1D', bg: (theme.danger + alpha) };
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }] }>
       {/* Заголовок */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>История</Text>
-          <Text style={styles.subtitle}>Всего записей: {items.length}</Text>
+          <Text style={[styles.title, { color: theme.text }]}>История</Text>
+          <Text style={[styles.subtitle, { color: theme.mutted }]}>Всего записей: {items.length}</Text>
         </View>
-        <View style={styles.statsCircle}>
+        <View style={[styles.statsCircle, { backgroundColor: theme.primary }] }>
           <Text style={styles.statsNumber}>{items.length}</Text>
         </View>
       </View>
 
       {/* Поиск */}
-      <View style={styles.searchWrapper}>
-        <Ionicons name="search" size={20} color="#94A3B8" style={styles.searchIcon} />
+      <View style={[styles.searchWrapper, { backgroundColor: theme.card }] }>
+        <Ionicons name="search" size={20} color={theme.mutted} style={styles.searchIcon} />
         <TextInput 
-          style={styles.searchInput} 
+          style={[styles.searchInput, { color: theme.text }]} 
           placeholder="Поиск по имени пациента" 
           value={searchQuery} 
           onChangeText={setSearchQuery}
-          placeholderTextColor="#CBD5E1"
+          placeholderTextColor={theme.mutted}
         />
         {searchQuery.length > 0 && (
-          <Pressable onPress={() => setSearchQuery('')} style={styles.clearBtn}>
-            <Ionicons name="close-circle" size={20} color="#94A3B8" />
+          <Pressable onPress={() => setSearchQuery('')} style={styles.clearBtn} accessibilityRole="button">
+            <Ionicons name="close-circle" size={20} color={theme.mutted} />
           </Pressable>
         )}
       </View>
 
       {/* Список или пустое состояние */}
       {items.length === 0 ? (
-        <View style={styles.empty}>
-          <View style={styles.emptyIconCircle}>
-            <Ionicons name="document-text-outline" size={48} color="#CBD5E1" />
+          <View style={styles.empty}>
+          <View style={[styles.emptyIconCircle, { backgroundColor: theme.border }] }>
+            <Ionicons name="document-text-outline" size={48} color={theme.mutted} />
           </View>
-          <Text style={styles.emptyTitle}>История пуста</Text>
-          <Text style={styles.emptyText}>Ваши расчёты будут отображаться здесь</Text>
+          <Text style={[styles.emptyTitle, { color: theme.mutted }]}>История пуста</Text>
+          <Text style={[styles.emptyText, { color: theme.mutted }]}>Ваши расчёты будут отображаться здесь</Text>
         </View>
       ) : filtered.length === 0 ? (
-        <View style={styles.empty}>
-          <View style={styles.emptyIconCircle}>
-            <Ionicons name="search" size={48} color="#CBD5E1" />
+          <View style={styles.empty}>
+          <View style={[styles.emptyIconCircle, { backgroundColor: theme.border }] }>
+            <Ionicons name="search" size={48} color={theme.mutted} />
           </View>
-          <Text style={styles.emptyTitle}>Ничего не найдено</Text>
-          <Text style={styles.emptyText}>Попробуйте изменить запрос</Text>
+          <Text style={[styles.emptyTitle, { color: theme.mutted }]}>Ничего не найдено</Text>
+          <Text style={[styles.emptyText, { color: theme.mutted }]}>Попробуйте изменить запрос</Text>
         </View>
       ) : (
         <FlatList 
@@ -144,7 +148,7 @@ export default function HistoryScreen() {
           renderItem={({ item }) => {
             const resultColor = getResultColor(item.result);
             return (
-              <View style={styles.card}>
+              <View style={[styles.card, { backgroundColor: theme.card }]}>
                 {/* Заголовок карточки */}
                 <View style={styles.cardHeader}>
                   <View style={styles.cardHeaderLeft}>
@@ -156,17 +160,18 @@ export default function HistoryScreen() {
                       />
                     </View>
                     <View style={styles.cardHeaderText}>
-                      <Text style={styles.cardPatient}>
+                      <Text style={[styles.cardPatient, { color: theme.text }] }>
                         {item.patientName || 'Без имени'}
                       </Text>
-                      <Text style={styles.cardDate}>{formatDate(item.createdAt)}</Text>
+                      <Text style={[styles.cardDate, { color: theme.mutted }]}>{formatDate(item.createdAt)}</Text>
                     </View>
                   </View>
                   <Pressable 
                     onPress={() => deleteItem(item.id)}
-                    style={styles.deleteBtn}
+                    style={[styles.deleteBtn, { backgroundColor: theme.danger + '20' }]}
+                    accessibilityRole="button"
                   >
-                    <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                    <Ionicons name="trash-outline" size={18} color={theme.danger} />
                   </Pressable>
                 </View>
 
@@ -177,13 +182,13 @@ export default function HistoryScreen() {
                     <View style={[styles.resultBadge, { backgroundColor: cat.bg || (resultColor + '15') }]}>
                       <View style={styles.resultLeft}>
                         <Ionicons name="water" size={20} color={resultColor} />
-                        <Text style={styles.resultLabel}>Клиренс</Text>
+                        <Text style={[styles.resultLabel, { color: theme.mutted }]}>Клиренс</Text>
                       </View>
                       <View style={{ alignItems: 'flex-end' }}>
                         <Text style={[styles.resultValue, { color: resultColor }]}>
-                          {item.result} <Text style={styles.resultUnit}>mL/min</Text>
+                          {item.result} <Text style={[styles.resultUnit, { color: theme.mutted }]}>mL/min</Text>
                         </Text>
-                        <View style={[styles.categoryPill, { backgroundColor: cat.bg }]}>
+                        <View style={[styles.categoryPill, { backgroundColor: cat.bg }]}> 
                           <Text style={[styles.categoryText, { color: cat.color }]} numberOfLines={2} ellipsizeMode="tail">{cat.label}</Text>
                         </View>
                       </View>
@@ -193,19 +198,19 @@ export default function HistoryScreen() {
 
                 {/* Параметры */}
                 <View style={styles.params}>
-                  <View style={styles.paramItem}>
-                    <MaterialCommunityIcons name="weight-kilogram" size={16} color="#64748B" />
-                    <Text style={styles.paramText}>
+                  <View style={[styles.paramItem, { backgroundColor: theme.card }]}> 
+                    <MaterialCommunityIcons name="weight-kilogram" size={16} color={theme.mutted} />
+                    <Text style={[styles.paramText, { color: theme.mutted }]}> 
                       {item.weightRaw ?? item.weightKg ?? '—'} {item.weightUnit ?? 'kg'}
                     </Text>
                   </View>
-                  <View style={styles.paramItem}>
-                    <Ionicons name="calendar-outline" size={16} color="#64748B" />
-                    <Text style={styles.paramText}>{item.age ?? '—'} лет</Text>
+                  <View style={[styles.paramItem, { backgroundColor: theme.card }]}> 
+                    <Ionicons name="calendar-outline" size={16} color={theme.mutted} />
+                    <Text style={[styles.paramText, { color: theme.mutted }]}>{item.age ?? '—'} лет</Text>
                   </View>
-                  <View style={styles.paramItem}>
-                    <Ionicons name="flask-outline" size={16} color="#64748B" />
-                    <Text style={styles.paramText}>
+                  <View style={[styles.paramItem, { backgroundColor: theme.card }]}> 
+                    <Ionicons name="flask-outline" size={16} color={theme.mutted} />
+                    <Text style={[styles.paramText, { color: theme.mutted }]}> 
                       {item.creatinineRaw ?? item.creatinineMgDl ?? '—'} {item.creatinineUnit ?? 'mg/dL'}
                     </Text>
                   </View>

@@ -7,6 +7,7 @@ import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestor
 import { LineChart } from 'react-native-chart-kit';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTheme } from '../components/ThemeContext';
 
 interface HistoryDoc {
   result?: number;
@@ -17,6 +18,7 @@ interface HistoryDoc {
 const { width } = Dimensions.get('window');
 
 export default function DashboardScreen() {
+  const { theme } = useTheme();
   const [lastResult, setLastResult] = useState<string>('—');
   const [avg7, setAvg7] = useState<string>('—');
   const [count, setCount] = useState<number>(0);
@@ -50,30 +52,30 @@ export default function DashboardScreen() {
 
   return (
     <ScrollView 
-      contentContainerStyle={styles.container}
+      contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}
       showsVerticalScrollIndicator={false}
     >
       {/* Заголовок */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>Привет! 👋</Text>
-          <Text style={styles.subtitle}>Вот ваша статистика</Text>
+          <Text style={[styles.greeting, { color: theme.text }]}>Привет! 👋</Text>
+          <Text style={[styles.subtitle, { color: theme.mutted }]}>Вот ваша статистика</Text>
         </View>
-        <View style={styles.badge}>
-          <Ionicons name="analytics-outline" size={20} color="#007AFF" />
+        <View style={[styles.badge, { backgroundColor: theme.card }]}>
+          <Ionicons name="analytics-outline" size={20} color={theme.primary} />
         </View>
       </View>
 
       {/* Главная карточка с градиентом */}
       <LinearGradient
-        colors={['#007AFF', '#0051D5']}
+        colors={[theme.primary, theme.primary]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.heroCard}
       >
         <View style={styles.heroTop}>
           <View style={styles.heroLeft}>
-            <Text style={styles.heroLabel}>Последний результат</Text>
+            <Text style={[styles.heroLabel, { color: 'rgba(255,255,255,0.85)' }]}>Последний результат</Text>
             <View style={styles.heroValueRow}>
               <Text style={styles.heroValue}>
                 {lastResult === '—' ? '—' : lastResult}
@@ -82,12 +84,12 @@ export default function DashboardScreen() {
                 <Text style={styles.heroUnit}>mL/min</Text>
               )}
             </View>
-            {lastPatient !== '—' && (
-              <View style={styles.patientTag}>
-                <Ionicons name="person" size={12} color="#fff" />
-                <Text style={styles.patientText}>{lastPatient}</Text>
-              </View>
-            )}
+              {lastPatient !== '—' && (
+                <View style={styles.patientTag}>
+                  <Ionicons name="person" size={12} color="#fff" />
+                  <Text style={styles.patientText}>{lastPatient}</Text>
+                </View>
+              )}
           </View>
           
           {/* Тренд индикатор */}
@@ -121,7 +123,7 @@ export default function DashboardScreen() {
               chartConfig={{
                 backgroundGradientFrom: 'transparent',
                 backgroundGradientTo: 'transparent',
-                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity * 0.7})`,
+                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity * 0.85})`,
                 strokeWidth: 2,
                 propsForBackgroundLines: { strokeWidth: 0 }
               }}
@@ -135,21 +137,21 @@ export default function DashboardScreen() {
       {/* Компактная сетка статистики */}
       <View style={styles.statsGrid}>
         {/* Средний клиренс */}
-        <View style={[styles.miniCard, { backgroundColor: '#10B981' }]}>
+        <View style={[styles.miniCard, { backgroundColor: theme.success }]}>
           <Ionicons name="bar-chart-outline" size={24} color="#fff" />
           <Text style={styles.miniValue}>{avg7}</Text>
           <Text style={styles.miniLabel}>Средний (7)</Text>
         </View>
 
         {/* Всего расчётов */}
-        <View style={[styles.miniCard, { backgroundColor: '#F59E0B' }]}>
+        <View style={[styles.miniCard, { backgroundColor: theme.warning }]}>
           <Ionicons name="calculator-outline" size={24} color="#fff" />
           <Text style={styles.miniValue}>{count}</Text>
           <Text style={styles.miniLabel}>Расчётов</Text>
         </View>
 
         {/* Тренд */}
-        <View style={[styles.miniCard, { backgroundColor: '#8B5CF6' }]}>
+        <View style={[styles.miniCard, { backgroundColor: theme.primary }]}>
           <Ionicons 
             name={trendUp ? "trending-up" : "trending-down"} 
             size={24} 

@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
+import { useTheme } from './ThemeContext';
 
-export default function MiniSpark({ data }: { data?: number[] }) {
+export default function MiniSpark({ data, accent }: { data?: number[]; accent?: string }) {
   const vals = (data || []).slice(-20);
   if (!vals || vals.length === 0) return <View style={{ height: 36 }} />;
   const max = Math.max(...vals.map(v => (isNaN(v as any) ? 0 : Number(v))));
@@ -12,7 +13,9 @@ export default function MiniSpark({ data }: { data?: number[] }) {
       {vals.map((v, i) => {
         const n = isNaN(v as any) ? 0 : Number(v);
         const h = Math.round(((n - min) / range) * 100);
-        return <View key={i} style={[styles.bar, { height: `${10 + h}%` }]} />;
+        const { theme } = useTheme();
+        const barColor = accent ?? theme.primary;
+        return <View key={i} style={[styles.bar, { height: `${10 + h}%`, backgroundColor: barColor }]} />;
       })}
     </View>
   );
@@ -20,5 +23,5 @@ export default function MiniSpark({ data }: { data?: number[] }) {
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'flex-end', height: 36, gap: 4 },
-  bar: { width: 6, backgroundColor: '#2563eb', borderRadius: 3 }
+  bar: { width: 6, borderRadius: 3 }
 });

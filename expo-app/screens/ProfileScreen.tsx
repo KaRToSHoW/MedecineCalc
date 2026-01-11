@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, TextInput, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, TextInput, ScrollView, Switch, Alert } from 'react-native';
 import { auth, db } from '../firebase/initFirebase';
 import { signOut } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import Toast from 'react-native-toast-message';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../components/ThemeContext';
 import { LinearGradient } from 'expo-linear-gradient';
 
 interface ProfileData {
@@ -23,6 +24,7 @@ export default function ProfileScreen() {
   const user = auth.currentUser;
   const [profile, setProfile] = useState<ProfileData>({});
   const [editing, setEditing] = useState(false);
+  const { theme, mode, toggle } = useTheme();
 
   useEffect(() => {
     if (!user) return;
@@ -52,15 +54,25 @@ export default function ProfileScreen() {
     }
   };
 
+  const onNotifications = () => {
+    Alert.alert('Уведомления', 'Функция уведомлений в разработке');
+    Toast.show({ type: 'info', text1: 'Уведомления', text2: 'В разработке' });
+  };
+
+  const onPrivacy = () => {
+    Alert.alert('Конфиденциальность', 'Настройки конфиденциальности в разработке');
+    Toast.show({ type: 'info', text1: 'Конфиденциальность', text2: 'В разработке' });
+  };
+
   return (
     <ScrollView 
-      style={styles.container}
+      style={[styles.container, { backgroundColor: theme.background }]}
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
     >
       {/* Шапка с градиентом */}
       <LinearGradient
-        colors={['#8B5CF6', '#6D28D9']}
+        colors={[theme.accent ?? '#8B5CF6', theme.primary ?? '#6D28D9']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.header}
@@ -92,7 +104,7 @@ export default function ProfileScreen() {
       </LinearGradient>
 
       {/* Основная карточка */}
-      <View style={styles.mainCard}>
+      <View style={[styles.mainCard, { backgroundColor: theme.card }]}> 
         {editing ? (
           // Режим редактирования
           <View>
@@ -100,68 +112,68 @@ export default function ProfileScreen() {
             
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Полное имя</Text>
-              <View style={styles.inputWrapper}>
-                <Ionicons name="person-outline" size={18} color="#94A3B8" />
-                <TextInput 
-                  style={styles.input} 
-                  placeholder="Иванов Иван Иванович" 
-                  value={profile.name || ''} 
-                  onChangeText={v => setProfile(p => ({...p, name: v}))}
-                  placeholderTextColor="#CBD5E1"
-                />
-              </View>
+              <View style={[styles.inputWrapper, { borderColor: theme.border, backgroundColor: theme.background }]}>
+                  <Ionicons name="person-outline" size={18} color={theme.mutted} />
+                  <TextInput 
+                    style={[styles.input, { color: theme.text }]} 
+                    placeholder="Иванов Иван Иванович" 
+                    value={profile.name || ''} 
+                    onChangeText={v => setProfile(p => ({...p, name: v}))}
+                    placeholderTextColor={theme.mutted}
+                  />
+                </View>
             </View>
 
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Учреждение</Text>
-              <View style={styles.inputWrapper}>
-                <Ionicons name="business-outline" size={18} color="#94A3B8" />
+              <View style={[styles.inputWrapper, { borderColor: theme.border, backgroundColor: theme.background }]}>
+                <Ionicons name="business-outline" size={18} color={theme.mutted} />
                 <TextInput 
-                  style={styles.input} 
+                  style={[styles.input, { color: theme.text }]} 
                   placeholder="Городская больница №1" 
                   value={profile.institution || ''} 
                   onChangeText={v => setProfile(p => ({...p, institution: v}))}
-                  placeholderTextColor="#CBD5E1"
+                  placeholderTextColor={theme.mutted}
                 />
               </View>
             </View>
 
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Должность</Text>
-              <View style={styles.inputWrapper}>
-                <Ionicons name="briefcase-outline" size={18} color="#94A3B8" />
+              <View style={[styles.inputWrapper, { borderColor: theme.border, backgroundColor: theme.background }]}>
+                <Ionicons name="briefcase-outline" size={18} color={theme.mutted} />
                 <TextInput 
-                  style={styles.input} 
+                  style={[styles.input, { color: theme.text }]} 
                   placeholder="Врач-нефролог" 
                   value={profile.position || ''} 
                   onChangeText={v => setProfile(p => ({...p, position: v}))}
-                  placeholderTextColor="#CBD5E1"
+                  placeholderTextColor={theme.mutted}
                 />
               </View>
             </View>
 
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Телефон</Text>
-              <View style={styles.inputWrapper}>
-                <Ionicons name="call-outline" size={18} color="#94A3B8" />
+              <View style={[styles.inputWrapper, { borderColor: theme.border, backgroundColor: theme.background }]}>
+                <Ionicons name="call-outline" size={18} color={theme.mutted} />
                 <TextInput 
-                  style={styles.input} 
+                  style={[styles.input, { color: theme.text }]} 
                   placeholder="+7 (999) 123-45-67" 
                   value={profile.contact || ''} 
                   onChangeText={v => setProfile(p => ({...p, contact: v}))}
                   keyboardType="phone-pad"
-                  placeholderTextColor="#CBD5E1"
+                  placeholderTextColor={theme.mutted}
                 />
               </View>
             </View>
 
             <View style={styles.buttonRow}>
-              <Pressable style={[styles.button, styles.saveButton]} onPress={save}>
+              <Pressable style={[styles.button, styles.saveButton, { backgroundColor: theme.success }]} onPress={save}>
                 <Ionicons name="checkmark-circle" size={20} color="#fff" />
                 <Text style={styles.buttonText}>Сохранить</Text>
               </Pressable>
-              <Pressable style={[styles.button, styles.cancelButton]} onPress={() => setEditing(false)}>
-                <Text style={styles.cancelButtonText}>Отмена</Text>
+              <Pressable style={[styles.button, styles.cancelButton, { backgroundColor: theme.card }]} onPress={() => setEditing(false)}>
+                <Text style={[styles.cancelButtonText, { color: theme.mutted }]}>Отмена</Text>
               </Pressable>
             </View>
           </View>
@@ -169,50 +181,50 @@ export default function ProfileScreen() {
           // Режим просмотра
           <View>
             <View style={styles.infoSection}>
-              <View style={styles.infoRow}>
-                <View style={styles.iconCircle}>
-                  <Ionicons name="mail-outline" size={20} color="#8B5CF6" />
+              <View style={[styles.infoRow, { backgroundColor: theme.background }] }>
+                <View style={[styles.iconCircle, { backgroundColor: theme.card }] }>
+                  <Ionicons name="mail-outline" size={20} color={theme.accent} />
                 </View>
                 <View style={styles.infoContent}>
-                  <Text style={styles.infoLabel}>Email</Text>
-                  <Text style={styles.infoValue}>{user?.email ?? '—'}</Text>
+                  <Text style={[styles.infoLabel, { color: theme.mutted }]}>Email</Text>
+                  <Text style={[styles.infoValue, { color: theme.text }]}>{user?.email ?? '—'}</Text>
                 </View>
               </View>
 
               {profile.contact && (
-                <View style={styles.infoRow}>
-                  <View style={styles.iconCircle}>
-                    <Ionicons name="call-outline" size={20} color="#10B981" />
+                <View style={[styles.infoRow, { backgroundColor: theme.background }]}>
+                  <View style={[styles.iconCircle, { backgroundColor: theme.card }]}>
+                    <Ionicons name="call-outline" size={20} color={theme.success} />
                   </View>
                   <View style={styles.infoContent}>
-                    <Text style={styles.infoLabel}>Телефон</Text>
-                    <Text style={styles.infoValue}>{profile.contact}</Text>
+                    <Text style={[styles.infoLabel, { color: theme.mutted }]}>Телефон</Text>
+                    <Text style={[styles.infoValue, { color: theme.text }]}>{profile.contact}</Text>
                   </View>
                 </View>
               )}
 
               {profile.institution && (
-                <View style={styles.infoRow}>
-                  <View style={styles.iconCircle}>
-                    <Ionicons name="business-outline" size={20} color="#F59E0B" />
+                <View style={[styles.infoRow, { backgroundColor: theme.background }]}>
+                  <View style={[styles.iconCircle, { backgroundColor: theme.card }]}>
+                    <Ionicons name="business-outline" size={20} color={theme.warning} />
                   </View>
                   <View style={styles.infoContent}>
-                    <Text style={styles.infoLabel}>Учреждение</Text>
-                    <Text style={styles.infoValue}>{profile.institution}</Text>
+                    <Text style={[styles.infoLabel, { color: theme.mutted }]}>Учреждение</Text>
+                    <Text style={[styles.infoValue, { color: theme.text }]}>{profile.institution}</Text>
                   </View>
                 </View>
               )}
             </View>
 
             <View style={styles.actionButtons}>
-              <Pressable style={styles.editButton} onPress={() => setEditing(true)}>
-                <Ionicons name="create-outline" size={20} color="#8B5CF6" />
-                <Text style={styles.editButtonText}>Редактировать</Text>
+              <Pressable style={[styles.editButton, { backgroundColor: theme.card, borderColor: (theme.accent ?? '#8B5CF6') + '22' }]} onPress={() => setEditing(true)}>
+                <Ionicons name="create-outline" size={20} color={theme.accent} />
+                <Text style={[styles.editButtonText, { color: theme.accent }]}>Редактировать</Text>
               </Pressable>
 
-              <Pressable style={styles.signOutButton} onPress={doSignOut}>
-                <Ionicons name="log-out-outline" size={20} color="#EF4444" />
-                <Text style={styles.signOutButtonText}>Выйти</Text>
+              <Pressable style={[styles.signOutButton, { backgroundColor: theme.card, borderColor: (theme.danger ?? '#EF4444') + '22' }]} onPress={doSignOut}>
+                <Ionicons name="log-out-outline" size={20} color={theme.danger} />
+                <Text style={[styles.signOutButtonText, { color: theme.danger }]}>Выйти</Text>
               </Pressable>
             </View>
           </View>
@@ -222,29 +234,34 @@ export default function ProfileScreen() {
       {/* Дополнительные секции */}
       {!editing && (
         <>
-          <View style={styles.card}>
+          <View style={[styles.card, { backgroundColor: theme.card }] }>
             <Text style={styles.cardTitle}>Настройки</Text>
-            <Pressable style={styles.menuItem}>
-              <Ionicons name="notifications-outline" size={22} color="#64748B" />
-              <Text style={styles.menuText}>Уведомления</Text>
-              <Ionicons name="chevron-forward" size={20} color="#CBD5E1" />
+            <Pressable style={[styles.menuItem, { borderBottomColor: theme.border }]} onPress={onNotifications} accessibilityRole="button" accessible={true}>
+              <Ionicons name="notifications-outline" size={22} color={theme.mutted} />
+              <Text style={[styles.menuText, { color: theme.text }]}>Уведомления</Text>
+              <Ionicons name="chevron-forward" size={20} color={theme.mutted} />
             </Pressable>
-            <Pressable style={styles.menuItem}>
-              <Ionicons name="shield-checkmark-outline" size={22} color="#64748B" />
-              <Text style={styles.menuText}>Конфиденциальность</Text>
-              <Ionicons name="chevron-forward" size={20} color="#CBD5E1" />
+            <Pressable style={[styles.menuItem, { borderBottomColor: theme.border }]} onPress={onPrivacy} accessibilityRole="button" accessible={true}>
+              <Ionicons name="shield-checkmark-outline" size={22} color={theme.mutted} />
+              <Text style={[styles.menuText, { color: theme.text }]}>Конфиденциальность</Text>
+              <Ionicons name="chevron-forward" size={20} color={theme.mutted} />
+            </Pressable>
+            <Pressable style={[styles.menuItem, { borderBottomColor: theme.border }]} onPress={toggle} accessibilityRole="button" accessible={true}>
+              <Ionicons name="moon-outline" size={22} color={theme.mutted} />
+              <Text style={[styles.menuText, { color: theme.text }]}>Тема — {mode === 'dark' ? 'Тёмная' : 'Светлая'}</Text>
+              <Switch value={mode === 'dark'} onValueChange={() => {}} trackColor={{ true: theme.primary }} thumbColor={mode === 'dark' ? '#fff' : '#fff'} pointerEvents="none" />
             </Pressable>
           </View>
 
-          <View style={styles.card}>
+          <View style={[styles.card, { backgroundColor: theme.card }]}>
             <Text style={styles.cardTitle}>О приложении</Text>
-            <View style={styles.aboutRow}>
-              <Text style={styles.aboutLabel}>Версия</Text>
-              <Text style={styles.aboutValue}>1.0.0</Text>
+            <View style={[styles.aboutRow, { borderBottomColor: theme.border }] }>
+              <Text style={[styles.aboutLabel, { color: theme.mutted }]}>Версия</Text>
+              <Text style={[styles.aboutValue, { color: theme.text }]}>1.0.0</Text>
             </View>
-            <View style={styles.aboutRow}>
-              <Text style={styles.aboutLabel}>Разработчик</Text>
-              <Text style={styles.aboutValue}>Medical Apps</Text>
+            <View style={[styles.aboutRow, { borderBottomColor: theme.border }] }>
+              <Text style={[styles.aboutLabel, { color: theme.mutted }]}>Разработчик</Text>
+              <Text style={[styles.aboutValue, { color: theme.text }]}>Medical Apps</Text>
             </View>
           </View>
         </>

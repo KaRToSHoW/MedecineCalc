@@ -3,6 +3,7 @@ import { View, TouchableOpacity, Animated, StyleSheet, Dimensions, Text, Platfor
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
+import { useTheme } from './ThemeContext';
 const { width } = Dimensions.get('window');
 
 export default function GlassTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
@@ -18,6 +19,7 @@ export default function GlassTabBar({ state, descriptors, navigation }: BottomTa
 
   const translateX = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (tabPositions.length > 0 && tabPositions[state.index]) {
@@ -56,7 +58,7 @@ export default function GlassTabBar({ state, descriptors, navigation }: BottomTa
       pointerEvents="box-none"
     >
       {/* Фон в стиле iOS с blur эффектом */}
-      <BlurView style={styles.background} pointerEvents="none" />
+      <BlurView style={[styles.background, { backgroundColor: theme.glassBubble, borderColor: theme.glassBubble }]} pointerEvents="none" />
 
       {/* Контейнер для измерения ширины */}
       <View 
@@ -74,7 +76,9 @@ export default function GlassTabBar({ state, descriptors, navigation }: BottomTa
               height: bubbleSize,
               borderRadius: bubbleSize / 2,
               top: topOffset,
-              transform: [{ translateX }, { scale: scaleAnim }]
+              transform: [{ translateX }, { scale: scaleAnim }],
+              backgroundColor: theme.card,
+              borderColor: theme.glassBubble
             }
           ]}
           pointerEvents="none"
@@ -87,7 +91,7 @@ export default function GlassTabBar({ state, descriptors, navigation }: BottomTa
             const label = options.title ?? route.name;
             const focused = state.index === idx;
             const onPress = () => navigation.navigate(route.name);
-            const color = focused ? '#007AFF' : '#8E8E93';
+            const color = focused ? theme.primary : theme.mutted;
             
             let iconName = 'ellipse';
             if (route.name === 'Dashboard') iconName = 'speedometer-outline';
