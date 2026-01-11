@@ -7,28 +7,49 @@ import DashboardScreen from './screens/DashboardScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import HistoryScreen from './screens/HistoryScreen';
 import AuthScreen from './screens/AuthScreen';
-import AnimatedTabBar from './components/AnimatedTabBar';
+import GlassTabBar from './components/GlassTabBar';
+import SwipeWrapper from './components/SwipeWrapper';
+import { Ionicons } from '@expo/vector-icons';
 import { auth } from './firebase/initFirebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import Toast from 'react-native-toast-message';
-import { Text } from 'react-native';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function MainTabs() {
+  const tabs = ['Dashboard', 'Calculator', 'History', 'Profile'];
   return (
-    <Tab.Navigator screenOptions={{ headerShown: false }} tabBar={(props) => <AnimatedTabBar {...props} />}>
-      <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ tabBarLabel: 'Дашборд' }} />
-      <Tab.Screen name="Calculator" component={CalculatorScreen} options={{ tabBarLabel: 'Калькулятор' }} />
-      <Tab.Screen name="History" component={HistoryScreen} options={{ tabBarLabel: 'История' }} />
-      <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarLabel: 'Профиль' }} />
+    <Tab.Navigator
+      tabBar={props => <GlassTabBar {...props} />}
+      screenOptions={({ route }) => ({ headerShown: false })}
+    >
+      {tabs.map((name, idx) => {
+        let Component: any = DashboardScreen;
+        if (name === 'Calculator') Component = CalculatorScreen;
+        else if (name === 'History') Component = HistoryScreen;
+        else if (name === 'Profile') Component = ProfileScreen;
+
+        return (
+          <Tab.Screen
+            key={name}
+            name={name}
+            options={{ title: name === 'Dashboard' ? 'Дашборд' : name === 'Calculator' ? 'Калькулятор' : name === 'History' ? 'История' : 'Профиль' }}
+          >
+            {props => (
+              <SwipeWrapper {...props} tabs={tabs} index={idx}>
+                <Component {...props} />
+              </SwipeWrapper>
+            )}
+          </Tab.Screen>
+        );
+      })}
     </Tab.Navigator>
   );
 }
 
 export default function App() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, u => setUser(u));
