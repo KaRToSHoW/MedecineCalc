@@ -21,3 +21,12 @@
 Рекомендации по mockup:
 - Размеры: мобильный (iPhone SE / 375pt ширина) и tablet (768pt).
 - Цветовая схема: нейтральный фон `#fff`, акцент `#2563eb`, карточки `#f8fafc`.
+
+## Графические mockups
+Ниже — встроенные SVG-макеты, которые приложены к отчёту и находятся в `docs/mockups_images/`.
+
+- Calculator: [docs/mockups_images/calculator_mockup.svg](docs/mockups_images/calculator_mockup.svg)
+- History: [docs/mockups_images/history_mockup.svg](docs/mockups_images/history_mockup.svg)
+- Profile: [docs/mockups_images/profile_mockup.svg](docs/mockups_images/profile_mockup.svg)
+
+Если нужны растровые PNG-версии — могу экспортировать их и добавить в репозиторий.
